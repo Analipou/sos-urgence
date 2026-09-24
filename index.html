@@ -173,22 +173,14 @@
   </div>
 
   <div class="card">
-    <h3>4️⃣ Le contact sur place</h3>
+    <h3>4️⃣ Prochain check-in</h3>
     <div class="fld">
-      <label>Qui est sur place ? (facultatif)</label>
-      <input type="text" id="who" placeholder="Client, guest, housekeeper, personne...">
+      <label>Date</label>
+      <input type="date" id="checkinDate">
     </div>
     <div class="fld">
-      <label>Téléphone (facultatif)</label>
-      <input type="tel" id="phone" placeholder="+66 ...">
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>5️⃣ Ton rôle</h3>
-    <div class="fld">
-      <label>Villa manager qui envoie</label>
-      <input type="text" id="sender" placeholder="Ton nom ou prénom...">
+      <label>Heure</label>
+      <input type="time" id="checkinTime">
     </div>
   </div>
 
@@ -224,6 +216,9 @@
 const VILLAS_HOSTFULLY = ["2P Baan Makham #1 - Beachfront & Sunset Cottage", "2P Baan Makham #2 - Beachfront & Sunset Cottage", "2P Glamping #1 - Beachfront Tent", "2P Glamping #2 - Beachfront Tent", "Baan Saitara - 3BR Sea View Villa", "Baan Santilay", "Coconut Villa 7", "Coconut Villa 8", "Coralia Villa - Total privacy - 400M to the beach", "Cornerstone Villa", "Cozy Apartment A405 by SP Villa Management", "Happy Coco Monkey  by SP Villa Management", "Happy Coco Monkey - Cozy Studio  by SP Villa", "Happy Coco Monkey - by SP Villa Management", "Havens House", "La Maison by SP Villa Management", "Le Chateau de Maman", "Lucky Villa - Modern Pool 2BR Villa", "Magnolia 1–3BR Pool Villa", "Manna Beach- 2 Bedrooms Beach access Villa", "Martin's Villa 3BR Pool Villa with Tropical Garden", "Mo's Beachfront Villa by S&P Villa Management", "Modern Pool View Studio at Replay Samui", "Replay F405 by S&P Villa Management", "Replay H305  by SP Villa Management", "Sunset Hill Samui", "Terraza A312 - Cozy Apartment managed by S&P", "Terraza C401", "Terraza C402", "Terraza C403", "The Terraza A212 - Cozy apartment  by SP Villa", "The Terraza B303 - 40 SQM Cozy apartment", "The Terraza B311 - 31 SQM Cozy apartment", "The Terraza B312 - 50 SQM Cozy apartment", "The Terraza C404", "The Terraza C405", "Three Palms - Beach Front Tiny House  by SP Villa", "Villa Aditi", "Villa Alyne by S&P Villa Management", "Villa Amaya by SP Villa Management", "Villa Atmosphere - Beachfront Villa  by SP Villa", "Villa Aukena - 30m from the beach", "Villa Aura - Stunning Seaview villa", "Villa Ayana - Amazing View by SP Villa Management", "Villa Azure Haven", "Villa Baia Bay  by S&P Villa Management", "Villa Bavaria 1 by SP Villa Management", "Villa Bavaria 2 by SP Villa Management", "Villa Bavaria 3 by SP Villa Management", "Villa Calm - Amazing Sea View Villa", "Villa Chiang by S&P Villa Management", "Villa Chokdee by SP Villa Management", "Villa Coral View by SP Villa Management", "Villa Corniche - 3BR Peaceful Villa", "Villa Dusk- Peaceful Villa  by SP Villa Management", "Villa Fesa - 30m from the beach", "Villa Finca by SP Villa Management", "Villa Kathaleeya by SP Villa Management", "Villa Kawin - 3BR Peaceful Villa", "Villa Leo by SP Villa Management", "Villa Luka by SP Villa Management", "Villa Macha by S&P Villa Management", "Villa Mael - Peacful Villa  by SP Villa Management", "Villa Manea - Peaceful Villa with Seaview", "Villa Masterpiece - 3BR Peaceful Villa", "Villa Mode by SP Villa Management", "Villa Moon", "Villa Nalyn –3BR Beachfront House with Sunset View", "Villa Natao by SP Villa Management", "Villa Nela - Peaceful Sea View Managed by S&P", "Villa Nirvana by SP Villa Management", "Villa Noi by SP Villa Management", "Villa Palmara by SP Villa Management", "Villa Palmira by SP Villa Management", "Villa Pearl by SP Villa Management", "Villa Polak - Stunning panoramic views", "Villa Poseidon by SP Villa Management", "Villa Ravenala - tropical haven with pool", "Villa Royal Tipunch - Sea View Private Pool", "Villa Sabay by SP Villa Management", "Villa Salim - 30m from the beach", "Villa Sapparot by SP Villa Management", "Villa Sawadee 5 by SP Villa Management", "Villa Sea Sunset", "Villa Sea View", "Villa Staring at the Sea by S&P Villa Management", "Villa Suha - Cosy Villa with wonderful Sea View", "Villa Sukham Luxury Hillside Ocean Views", "Villa Sunray - 2BR Beach Access Cozy House", "Villa Sunray - 3BR Beach Access Cozy House", "Villa Twice Nice by S&P Villa Management", "Villa Twilight by S&P Villa Management", "Villa Victoria Sea View by S&P Villa Management", "Villa Wannelau by SP Villa Management", "Why Not Coconut by SP Villa Management"];
 const VILLAS_SOS = ["Alaya","Alpa","Amaya","Baan Santilay","Bikini 5","Bungalow Taling Ngam","CatWorld","Chiang","Dannys-House","Elisa","Esperanza","House Ban Tai","Jungle","Kathaleeya","Kirk","Kiwi Nest","La Lay","Macha","Magniola 13","Magniola 7","Magniola-1","Magnolia 13","Magnolia 6","Magnolia 9","Maris","Mo's Beach Front","Nela","Pearl","Seaview","Staring at the Sea","Staring-at-the-sea","Terraza C401","Terraza C403","Terraza C405","Terraza-A212","Training","Villa IM","Villa Marco","Villa Sheila"];
 const ALL_VILLAS = [...new Set([...VILLAS_HOSTFULLY, ...VILLAS_SOS])];
+// Date/heure check-in par défaut : maintenant (heure locale du téléphone)
+(function(){ const d = new Date(); const dt = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString();
+  const el = document.getElementById("checkinDate"); if (el) el.value = dt.slice(0,10); })();
 document.getElementById("villaList").innerHTML = ALL_VILLAS.map(v => `<option value="${v}">`).join("");
 
 // Étape 1
@@ -278,9 +273,7 @@ function submit() {
     pdesc: document.getElementById("pdesc").value.trim(),
     psince: document.getElementById("psince").value,
     photos: PHOTOS.length,
-    who: document.getElementById("who").value.trim(),
-    phone: document.getElementById("phone").value.trim(),
-    sender: document.getElementById("sender").value.trim(),
+    checkin: (document.getElementById("checkinDate").value || "") + (document.getElementById("checkinTime").value ? " " + document.getElementById("checkinTime").value : ""),
     date: new Date().toISOString()
   };
   // Historique local
@@ -310,7 +303,7 @@ renderHist();
 // Copier le récap pour le coller dans le chat SOS (mode sans backend)
 function copyRecap() {
   const d = window.__lastTicket; if (!d) return;
-  const lines = [`${d.kind} — ${d.ref}`, `Villa : ${d.villa}${d.zone ? " / " + d.zone : ""}`, `Problème : ${d.ptype}`, `Description : ${d.pdesc || "—"}`, `Depuis : ${d.psince}`, `Photos : ${d.photos}`, `Sur place : ${d.who || "—"}${d.phone ? " · " + d.phone : ""}`, `Envoyé par : ${d.sender || "—"} le ${new Date(d.date).toLocaleString("fr-FR")}`];
+  const lines = [`${d.kind} — ${d.ref}`, `Villa : ${d.villa}${d.zone ? " / " + d.zone : ""}`, `Problème : ${d.ptype}`, `Description : ${d.pdesc || "—"}`, `Depuis : ${d.psince}`, `Photos : ${d.photos}`, `Prochain check-in : ${d.checkin || "—"}`, `Envoyé le ${new Date(d.date).toLocaleString("fr-FR")}`];
   navigator.clipboard.writeText(lines.join("\n"));
   toast("Récap copié — colle-le dans le groupe WhatsApp SOS");
 }
