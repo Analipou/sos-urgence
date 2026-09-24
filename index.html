@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚨 SOS URGENCE — Villa Manager</title>
+<style>
+  :root {
+    --kraft: #f2e8d5; --paper: #faf5e8; --ink: #2d2620;
+    --coral: #e85a47; --teal: #1d6e6e; --gold: #f0b429; --green: #2e9e5b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, 'SF Pro', 'Segoe UI', sans-serif;
+    background: var(--kraft);
+    background-image: radial-gradient(circle at 15% 25%, rgba(255,255,255,0.4) 0%, transparent 45%),
+                      radial-gradient(circle at 85% 75%, rgba(210,180,130,0.25) 0%, transparent 50%);
+    min-height:100vh; color:var(--ink); padding:16px 12px 90px;
+  }
+  header { text-align:center; margin-bottom:18px; }
+  h1 { font-size:clamp(1.6rem,5vw,2.4rem); letter-spacing:0.5px; }
+  .sub { color:#6d6355; font-size:0.95rem; margin-top:6px; }
+
+  /* Étape 1 : urgence ou important */
+  .big-choice { display:grid; grid-template-columns:1fr 1fr; gap:14px; max-width:640px; margin:0 auto; }
+  .choice {
+    background:var(--paper); border-radius:22px; padding:30px 16px;
+    text-align:center; cursor:pointer; border:3px solid transparent;
+    box-shadow:0 5px 0 rgba(45,38,32,0.15), 0 10px 24px rgba(45,38,32,0.12);
+    transition:all .18s ease;
+  }
+  .choice:hover { transform:translateY(-4px) scale(1.02); }
+  .choice.sel { border-color:currentColor; }
+  .choice.urg { color:var(--coral); }
+  .choice.imp { color:var(--teal); }
+  .choice .ic { font-size:3.2rem; }
+  .choice h2 { font-size:1.35rem; margin:8px 0 4px; }
+  .choice p { font-size:0.85rem; color:#6d6355; }
+
+  /* Formulaire */
+  .form-wrap { max-width:640px; margin:0 auto; display:none; }
+  .form-wrap.show { display:block; }
+  .card {
+    background:var(--paper); border-radius:20px; padding:18px 16px;
+    box-shadow:0 4px 0 rgba(45,38,32,0.13); margin-bottom:14px;
+  }
+  .card h3 { color:var(--teal); font-size:1.05rem; margin-bottom:10px; }
+  .fld { margin-bottom:12px; }
+  .fld label { display:block; font-size:0.85rem; color:#6d6355; margin-bottom:5px; }
+  input[type=text], input[type=tel], select, textarea {
+    width:100%; font-size:1rem; padding:11px 12px;
+    border:2px solid rgba(45,38,32,0.18); border-radius:12px;
+    background:#fff; color:var(--ink); font-family:inherit;
+  }
+  textarea { min-height:80px; resize:vertical; }
+  select { appearance:none; background:#fff url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%232d2620' stroke-width='2' fill='none'/></svg>") no-repeat right 12px center; }
+
+  /* Photo */
+  .photo-zone { display:flex; gap:10px; flex-wrap:wrap; }
+  .photo-slot {
+    width:74px; height:74px; border-radius:14px; border:2px dashed rgba(45,38,32,0.3);
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem;
+    background:#fff; cursor:pointer; position:relative; overflow:hidden;
+  }
+  .photo-slot input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .photo-slot img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+
+  .btn {
+    font-family:inherit; background:var(--coral); color:#fff; border:none;
+    border-radius:999px; padding:14px 30px; font-size:1.1rem; cursor:pointer;
+    box-shadow:0 4px 0 rgba(45,38,32,0.25); transition:transform .15s; width:100%;
+  }
+  .btn:active { transform:translateY(2px); }
+  .btn:disabled { opacity:0.5; }
+  .btn.teal { background:var(--teal); }
+
+  /* Écran confirmation */
+  .done { display:none; text-align:center; max-width:520px; margin:0 auto; padding-top:30px; }
+  .done.show { display:block; }
+  .done .big { font-size:4.5rem; }
+  .done h2 { color:var(--teal); margin:10px 0 6px; }
+  .done p { color:#6d6355; font-size:0.95rem; }
+  .done .ref {
+    display:inline-block; background:var(--paper); border-radius:12px; padding:8px 18px;
+    margin:14px 0; font-weight:600; letter-spacing:1px; box-shadow:0 3px 0 rgba(45,38,32,0.15);
+  }
+  .done .steps { text-align:left; background:var(--paper); border-radius:16px; padding:14px 16px; margin-top:12px; }
+  .done .steps div { padding:5px 0; font-size:0.92rem; }
+
+  /* Historique local */
+  .hist { max-width:640px; margin:26px auto 0; }
+  .hist h3 { color:#6d6355; font-size:0.9rem; margin-bottom:8px; }
+  .hist-item { background:var(--paper); border-radius:14px; padding:10px 14px; margin-bottom:8px; display:flex; gap:10px; align-items:center; box-shadow:0 2px 0 rgba(45,38,32,0.1); }
+  .hist-item .badge { font-size:1.2rem; }
+  .hist-item .txt { flex:1; font-size:0.88rem; }
+  .hist-item .txt small { color:#8a7f6d; display:block; }
+
+  @media (max-width:480px){ .big-choice{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🚨 SOS URGENCE</h1>
+  <div class="sub">Formulaire Villa Manager — SOS Maintenance</div>
+</header>
+
+<!-- ÉTAPE 1 -->
+<div class="big-choice" id="step1">
+  <div class="choice urg" onclick="choose('urg')">
+    <div class="ic">🚨</div>
+    <h2>URGENCE</h2>
+    <p>Fuite, panne, danger, client en attente maintenant</p>
+  </div>
+  <div class="choice imp" onclick="choose('imp')">
+    <div class="ic">⚠️</div>
+    <h2>IMPORTANT</h2>
+    <p>À traiter aujourd'hui ou demain, pas de danger immédiat</p>
+  </div>
+</div>
+
+<!-- ÉTAPE 2 : FORMULAIRE -->
+<div class="form-wrap" id="step2">
+  <div class="card">
+    <h3>1️⃣ La villa</h3>
+    <div class="fld">
+      <label>Villa concernée</label>
+      <input type="text" id="villa" list="villaList" placeholder="Tape le nom de la villa...">
+      <datalist id="villaList"></datalist>
+    </div>
+    <div class="fld">
+      <label>Zone / bâtiment (facultatif)</label>
+      <input type="text" id="zone" placeholder="Ex : piscine, cuisine, chambre 2, toit...">
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>2️⃣ Le problème</h3>
+    <div class="fld">
+      <label>Type de problème</label>
+      <select id="ptype">
+        <option>💧 Fuite d'eau / plomberie</option>
+        <option>❄️ Climatisation</option>
+        <option>⚡ Électricité</option>
+        <option>🏊 Piscine</option>
+        <option>🐛 Nuisibles / pest control</option>
+        <option>🌐 Internet / Wi-Fi</option>
+        <option>🚪 Serrure / accès / porte</option>
+        <option>🧱 Cassis / dégâts (vitre, tuile...)</option>
+        <option>🌳 Jardin / végétation</option>
+        <option>🛠️ Autre</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Décris ce qui se passe (1-2 phrases suffisent)</label>
+      <textarea id="pdesc" placeholder="Ex : l'eau coule sous l'évier de la cuisine depuis ce matin, le client est sur place"></textarea>
+    </div>
+    <div class="fld">
+      <label>Depuis quand ?</label>
+      <select id="psince">
+        <option>Maintenant (ça vient de commencer)</option>
+        <option>Aujourd'hui</option>
+        <option>Depuis hier</option>
+        <option>Plusieurs jours</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>3️⃣ Les photos</h3>
+    <div class="photo-zone" id="photoZone">
+      <div class="photo-slot">📷<input type="file" accept="image/*" multiple onchange="addPhotos(this)"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>4️⃣ Le contact sur place</h3>
+    <div class="fld">
+      <label>Qui est sur place ? (facultatif)</label>
+      <input type="text" id="who" placeholder="Client, guest, housekeeper, personne...">
+    </div>
+    <div class="fld">
+      <label>Téléphone (facultatif)</label>
+      <input type="tel" id="phone" placeholder="+66 ...">
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>5️⃣ Ton rôle</h3>
+    <div class="fld">
+      <label>Villa manager qui envoie</label>
+      <input type="text" id="sender" placeholder="Ton nom ou prénom...">
+    </div>
+  </div>
+
+  <button class="btn" onclick="submit()">✅ ENVOYER À SOS MAINTENANCE</button>
+  <button class="btn teal" style="margin-top:10px;background:#b7aca0" onclick="back()">← Retour</button>
+</div>
+
+<!-- ÉTAPE 3 : CONFIRMATION -->
+<div class="done" id="step3">
+  <div class="big">✅</div>
+  <h2>Envoyé !</h2>
+  <p>SOS Maintenance a reçu ton signalement.</p>
+  <div class="ref" id="refCode"></div>
+  <p>Notre réponse automatique :</p>
+  <div class="steps">
+    <div>🤖 <b>« Bien reçu ! Ton signalement est en cours de traitement par SOS Maintenance. Un technicien va vérifier la situation et te tenir informé. »</b></div>
+  </div>
+  <div class="steps">
+    <div>⏱️ <b>URGENCE</b> : technicien mobilisé dans l'heure (selon dispo)</div>
+    <div>📅 <b>IMPORTANT</b> : intervention planifiée aujourd'hui ou demain</div>
+    <div>📸 Tu recevras des photos du travail réalisé</div>
+  </div>
+  <button class="btn teal" onclick="copyRecap()">📋 Copier le récap pour le groupe SOS</button>
+  <button class="btn teal" style="background:#b7aca0;margin-top:10px" onclick="location.reload()">➕ Nouveau signalement</button>
+</div>
+
+<div class="hist" id="histZone">
+  <h3>📋 Historique de cet appareil (local)</h3>
+</div>
+
+<script>
+// ===== Données villas : parc Hostfully S&P (135 noms capturés) + villas SOS_Workflow =====
+const VILLAS_HOSTFULLY = ["2P Baan Makham #1 - Beachfront & Sunset Cottage", "2P Baan Makham #2 - Beachfront & Sunset Cottage", "2P Glamping #1 - Beachfront Tent", "2P Glamping #2 - Beachfront Tent", "Baan Saitara - 3BR Sea View Villa", "Baan Santilay", "Coconut Villa 7", "Coconut Villa 8", "Coralia Villa - Total privacy - 400M to the beach", "Cornerstone Villa", "Cozy Apartment A405 by SP Villa Management", "Happy Coco Monkey  by SP Villa Management", "Happy Coco Monkey - Cozy Studio  by SP Villa", "Happy Coco Monkey - by SP Villa Management", "Havens House", "La Maison by SP Villa Management", "Le Chateau de Maman", "Lucky Villa - Modern Pool 2BR Villa", "Magnolia 1–3BR Pool Villa", "Manna Beach- 2 Bedrooms Beach access Villa", "Martin's Villa 3BR Pool Villa with Tropical Garden", "Mo's Beachfront Villa by S&P Villa Management", "Modern Pool View Studio at Replay Samui", "Replay F405 by S&P Villa Management", "Replay H305  by SP Villa Management", "Sunset Hill Samui", "Terraza A312 - Cozy Apartment managed by S&P", "Terraza C401", "Terraza C402", "Terraza C403", "The Terraza A212 - Cozy apartment  by SP Villa", "The Terraza B303 - 40 SQM Cozy apartment", "The Terraza B311 - 31 SQM Cozy apartment", "The Terraza B312 - 50 SQM Cozy apartment", "The Terraza C404", "The Terraza C405", "Three Palms - Beach Front Tiny House  by SP Villa", "Villa Aditi", "Villa Alyne by S&P Villa Management", "Villa Amaya by SP Villa Management", "Villa Atmosphere - Beachfront Villa  by SP Villa", "Villa Aukena - 30m from the beach", "Villa Aura - Stunning Seaview villa", "Villa Ayana - Amazing View by SP Villa Management", "Villa Azure Haven", "Villa Baia Bay  by S&P Villa Management", "Villa Bavaria 1 by SP Villa Management", "Villa Bavaria 2 by SP Villa Management", "Villa Bavaria 3 by SP Villa Management", "Villa Calm - Amazing Sea View Villa", "Villa Chiang by S&P Villa Management", "Villa Chokdee by SP Villa Management", "Villa Coral View by SP Villa Management", "Villa Corniche - 3BR Peaceful Villa", "Villa Dusk- Peaceful Villa  by SP Villa Management", "Villa Fesa - 30m from the beach", "Villa Finca by SP Villa Management", "Villa Kathaleeya by SP Villa Management", "Villa Kawin - 3BR Peaceful Villa", "Villa Leo by SP Villa Management", "Villa Luka by SP Villa Management", "Villa Macha by S&P Villa Management", "Villa Mael - Peacful Villa  by SP Villa Management", "Villa Manea - Peaceful Villa with Seaview", "Villa Masterpiece - 3BR Peaceful Villa", "Villa Mode by SP Villa Management", "Villa Moon", "Villa Nalyn –3BR Beachfront House with Sunset View", "Villa Natao by SP Villa Management", "Villa Nela - Peaceful Sea View Managed by S&P", "Villa Nirvana by SP Villa Management", "Villa Noi by SP Villa Management", "Villa Palmara by SP Villa Management", "Villa Palmira by SP Villa Management", "Villa Pearl by SP Villa Management", "Villa Polak - Stunning panoramic views", "Villa Poseidon by SP Villa Management", "Villa Ravenala - tropical haven with pool", "Villa Royal Tipunch - Sea View Private Pool", "Villa Sabay by SP Villa Management", "Villa Salim - 30m from the beach", "Villa Sapparot by SP Villa Management", "Villa Sawadee 5 by SP Villa Management", "Villa Sea Sunset", "Villa Sea View", "Villa Staring at the Sea by S&P Villa Management", "Villa Suha - Cosy Villa with wonderful Sea View", "Villa Sukham Luxury Hillside Ocean Views", "Villa Sunray - 2BR Beach Access Cozy House", "Villa Sunray - 3BR Beach Access Cozy House", "Villa Twice Nice by S&P Villa Management", "Villa Twilight by S&P Villa Management", "Villa Victoria Sea View by S&P Villa Management", "Villa Wannelau by SP Villa Management", "Why Not Coconut by SP Villa Management"];
+const VILLAS_SOS = ["Alaya","Alpa","Amaya","Baan Santilay","Bikini 5","Bungalow Taling Ngam","CatWorld","Chiang","Dannys-House","Elisa","Esperanza","House Ban Tai","Jungle","Kathaleeya","Kirk","Kiwi Nest","La Lay","Macha","Magniola 13","Magniola 7","Magniola-1","Magnolia 13","Magnolia 6","Magnolia 9","Maris","Mo's Beach Front","Nela","Pearl","Seaview","Staring at the Sea","Staring-at-the-sea","Terraza C401","Terraza C403","Terraza C405","Terraza-A212","Training","Villa IM","Villa Marco","Villa Sheila"];
+const ALL_VILLAS = [...new Set([...VILLAS_HOSTFULLY, ...VILLAS_SOS])];
+document.getElementById("villaList").innerHTML = ALL_VILLAS.map(v => `<option value="${v}">`).join("");
+
+// Étape 1
+let KIND = null;
+function choose(k) {
+  KIND = k;
+  document.getElementById("step1").style.display = "none";
+  document.getElementById("step2").classList.add("show");
+  window.scrollTo(0, 0);
+}
+function back() {
+  document.getElementById("step2").classList.remove("show");
+  document.getElementById("step1").style.display = "grid";
+}
+
+// Photos
+let PHOTOS = [];
+function addPhotos(input) {
+  [...input.files].forEach(f => {
+    const r = new FileReader();
+    r.onload = e => {
+      PHOTOS.push({ name: f.name, data: e.target.result });
+      renderPhotos();
+    };
+    r.readAsDataURL(f);
+  });
+}
+function renderPhotos() {
+  const z = document.getElementById("photoZone");
+  z.innerHTML = "";
+  PHOTOS.forEach((p, i) => {
+    const d = document.createElement("div");
+    d.className = "photo-slot";
+    d.innerHTML = `<img src="${p.data}"><div style="position:absolute;top:2px;right:4px;cursor:pointer" onclick="PHOTOS.splice(${i},1);renderPhotos()">✕</div>`;
+    z.appendChild(d);
+  });
+  const add = document.createElement("div");
+  add.className = "photo-slot";
+  add.innerHTML = `➕<input type="file" accept="image/*" multiple onchange="addPhotos(this)">`;
+  z.appendChild(add);
+}
+
+// Envoi
+function submit() {
+  const villa = document.getElementById("villa").value.trim();
+  if (!villa) { alert("Indique la villa concernée"); return; }
+  const data = {
+    ref: "SOS-" + Date.now().toString(36).toUpperCase(),
+    kind: KIND === "urg" ? "🚨 URGENCE" : "⚠️ IMPORTANT",
+    villa, zone: document.getElementById("zone").value.trim(),
+    ptype: document.getElementById("ptype").value,
+    pdesc: document.getElementById("pdesc").value.trim(),
+    psince: document.getElementById("psince").value,
+    photos: PHOTOS.length,
+    who: document.getElementById("who").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    sender: document.getElementById("sender").value.trim(),
+    date: new Date().toISOString()
+  };
+  // Historique local
+  const hist = JSON.parse(localStorage.getItem("sosUrgences") || "[]");
+  hist.unshift({ ref: data.ref, kind: data.kind, villa, ptype: data.ptype, date: data.date, envoye: "déclaré" });
+  localStorage.setItem("sosUrgences", JSON.stringify(hist.slice(0, 30)));
+  renderHist();
+  document.getElementById("step2").classList.remove("show");
+  document.getElementById("step3").classList.add("show");
+  document.getElementById("refCode").textContent = data.ref;
+  window.__lastTicket = data;
+  window.scrollTo(0, 0);
+}
+
+// Historique
+function renderHist() {
+  const hist = JSON.parse(localStorage.getItem("sosUrgences") || "[]");
+  const z = document.getElementById("histZone");
+  z.innerHTML = "<h3>📋 Historique de cet appareil (local)</h3>" + (hist.length ? hist.map(h => `
+    <div class="hist-item">
+      <div class="badge">${h.kind.startsWith("🚨") ? "🚨" : "⚠️"}</div>
+      <div class="txt"><b>${h.villa}</b> — ${h.ptype.replace(/^\\S+\\s*/u, "")}<small>${new Date(h.date).toLocaleString("fr-FR")} · ${h.ref}</small></div>
+    </div>`).join("") : '<div style="color:#8a7f6d;font-size:0.85rem">Aucun signalement depuis cet appareil.</div>');
+}
+renderHist();
+
+// Copier le récap pour le coller dans le chat SOS (mode sans backend)
+function copyRecap() {
+  const d = window.__lastTicket; if (!d) return;
+  const lines = [`${d.kind} — ${d.ref}`, `Villa : ${d.villa}${d.zone ? " / " + d.zone : ""}`, `Problème : ${d.ptype}`, `Description : ${d.pdesc || "—"}`, `Depuis : ${d.psince}`, `Photos : ${d.photos}`, `Sur place : ${d.who || "—"}${d.phone ? " · " + d.phone : ""}`, `Envoyé par : ${d.sender || "—"} le ${new Date(d.date).toLocaleString("fr-FR")}`];
+  navigator.clipboard.writeText(lines.join("\n"));
+  toast("Récap copié — colle-le dans le groupe WhatsApp SOS");
+}
+</script>
+</body>
+</html>
