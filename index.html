@@ -206,7 +206,8 @@
     <div>📅 <b>IMPORTANT</b> : intervention planifiée aujourd'hui ou demain</div>
     <div>📸 Tu recevras des photos du travail réalisé</div>
   </div>
-  <button class="btn teal" onclick="copyRecap()">📋 Copier le récap pour le groupe SOS</button>
+  <button class="btn teal" onclick="sendWa()">📲 Envoyer dans WhatsApp SOS</button>
+  <button class="btn teal" style="background:#b7aca0;margin-top:8px" onclick="copyRecap()">📋 Ou copier le récap</button>
   <button class="btn teal" style="background:#b7aca0;margin-top:10px" onclick="location.reload()">➕ Nouveau signalement</button>
 </div>
 
@@ -309,6 +310,28 @@ function copyRecap() {
   const lines = [`${d.kind} — ${d.ref}`, `Villa : ${d.villa}${d.zone ? " / " + d.zone : ""}`, `Problème : ${d.ptype}`, `Description : ${d.pdesc || "—"}`, `Depuis : ${d.psince}`, `Photos : ${d.photos}`, `Prochain check-in : ${d.checkin || "—"}`, `Envoyé le ${new Date(d.date).toLocaleString("fr-FR")}`];
   navigator.clipboard.writeText(lines.join("\n"));
   toast("Récap copié — colle-le dans le groupe WhatsApp SOS");
+}
+// Envoi WhatsApp pré-rempli (le manager ajoute les photos dans le chat)
+function sendWa() {
+  const d = window.__lastTicket; if (!d) return;
+  const dest = localStorage.getItem("sosWaDest") || "";
+  if (!dest) {
+    const n = prompt("Numéro WhatsApp de SOS Maintenance (format international sans +, ex : 66XXXXXXXXX) :");
+    if (!n) return;
+    localStorage.setItem("sosWaDest", n.replace(/\D/g, ""));
+    return sendWa();
+  }
+  const lines = [
+    KIND === "urg" ? "🚨 URGENCE " + d.ref : "⚠️ IMPORTANT " + d.ref,
+    "Villa : " + d.villa + (d.zone ? " / " + d.zone : ""),
+    "Problème : " + d.ptype,
+    d.pdesc ? "Détail : " + d.pdesc : "",
+    "Depuis : " + d.psince,
+    "Prochain check-in : " + (d.checkin || "—"),
+    "Photos : " + d.photos + " (je les envoie dans ce chat)"
+  ].filter(Boolean);
+  const url = "https://wa.me/" + localStorage.getItem("sosWaDest") + "?text=" + encodeURIComponent(lines.join("\n"));
+  window.location.href = url;
 }
 </script>
 </body>
